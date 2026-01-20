@@ -1,0 +1,160 @@
+{
+    "actions": [],
+    "creation": "2025-01-20 20:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "request_id",
+        "tool_name",
+        "mcp_user",
+        "ip_address",
+        "details_section",
+        "ref_doctype",
+        "docname",
+        "operation",
+        "status",
+        "http_status",
+        "latency_ms",
+        "payload_section",
+        "request_summary_json",
+        "response_summary_json",
+        "diff_json",
+        "error_section",
+        "error_trace"
+    ],
+    "fields": [
+        {
+            "fieldname": "request_id",
+            "fieldtype": "Data",
+            "label": "Request ID",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "tool_name",
+            "fieldtype": "Data",
+            "label": "Tool Name",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "mcp_user",
+            "fieldtype": "Link",
+            "label": "MCP User",
+            "options": "User",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "ip_address",
+            "fieldtype": "Data",
+            "label": "IP Address",
+            "read_only": 1
+        },
+        {
+            "fieldname": "details_section",
+            "fieldtype": "Section Break",
+            "label": "Details"
+        },
+        {
+            "fieldname": "ref_doctype",
+            "fieldtype": "Data",
+            "label": "DocType",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "docname",
+            "fieldtype": "Data",
+            "label": "DocName",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "operation",
+            "fieldtype": "Select",
+            "label": "Operation",
+            "options": "\nRead\nCreate\nUpdate\nDelete\nMeta\nSearch\nReport",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "label": "Status",
+            "options": "Success\nFail",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "http_status",
+            "fieldtype": "Int",
+            "label": "HTTP Status",
+            "read_only": 1
+        },
+        {
+            "fieldname": "latency_ms",
+            "fieldtype": "Int",
+            "label": "Latency (ms)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "payload_section",
+            "fieldtype": "Section Break",
+            "label": "Payloads"
+        },
+        {
+            "fieldname": "request_summary_json",
+            "fieldtype": "Long Text",
+            "label": "Request Summary",
+            "read_only": 1
+        },
+        {
+            "fieldname": "response_summary_json",
+            "fieldtype": "Long Text",
+            "label": "Response Summary",
+            "read_only": 1
+        },
+        {
+            "fieldname": "diff_json",
+            "fieldtype": "Long Text",
+            "label": "Diff",
+            "read_only": 1
+        },
+        {
+            "fieldname": "error_section",
+            "fieldtype": "Section Break",
+            "label": "Errors"
+        },
+        {
+            "fieldname": "error_trace",
+            "fieldtype": "Long Text",
+            "label": "Error Trace",
+            "read_only": 1
+        }
+    ],
+    "issingle": 0,
+    "links": [],
+    "modified": "2025-01-20 20:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Mcp Server",
+    "name": "MCP Audit Log",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 0,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 0
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

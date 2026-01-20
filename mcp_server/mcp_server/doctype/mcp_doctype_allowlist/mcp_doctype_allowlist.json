@@ -1,0 +1,140 @@
+{
+    "actions": [],
+    "creation": "2025-01-20 20:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "enabled",
+        "doctype_ref",
+        "permissions_section",
+        "allow_read",
+        "allow_create",
+        "allow_update",
+        "allow_delete",
+        "allow_meta",
+        "limits_section",
+        "max_page_length",
+        "fields_section",
+        "allowed_fields_read",
+        "allowed_fields_write",
+        "allowed_filters",
+        "notes"
+    ],
+    "fields": [
+        {
+            "fieldname": "enabled",
+            "fieldtype": "Check",
+            "label": "Enabled",
+            "default": "1"
+        },
+        {
+            "fieldname": "doctype_ref",
+            "fieldtype": "Link",
+            "label": "DocType",
+            "options": "DocType",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "permissions_section",
+            "fieldtype": "Section Break",
+            "label": "Allowed Operations"
+        },
+        {
+            "fieldname": "allow_read",
+            "fieldtype": "Check",
+            "label": "Allow Read (Get, Search)",
+            "default": "1",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "allow_create",
+            "fieldtype": "Check",
+            "label": "Allow Create"
+        },
+        {
+            "fieldname": "allow_update",
+            "fieldtype": "Check",
+            "label": "Allow Update"
+        },
+        {
+            "fieldname": "allow_delete",
+            "fieldtype": "Check",
+            "label": "Allow Delete"
+        },
+        {
+            "fieldname": "allow_meta",
+            "fieldtype": "Check",
+            "label": "Allow Meta (Schema)",
+            "default": "1"
+        },
+        {
+            "fieldname": "limits_section",
+            "fieldtype": "Section Break",
+            "label": "Limits"
+        },
+        {
+            "fieldname": "max_page_length",
+            "fieldtype": "Int",
+            "label": "Max Page Length",
+            "description": "Override default max page length"
+        },
+        {
+            "fieldname": "fields_section",
+            "fieldtype": "Section Break",
+            "label": "Field & Filter Restrictions"
+        },
+        {
+            "fieldname": "allowed_fields_read",
+            "fieldtype": "Table",
+            "label": "Allowed Fields (Read)",
+            "options": "MCP Field Allowlist Item",
+            "description": "Leave empty to allow all non-sensitive fields"
+        },
+        {
+            "fieldname": "allowed_fields_write",
+            "fieldtype": "Table",
+            "label": "Allowed Fields (Write)",
+            "options": "MCP Field Allowlist Item",
+            "description": "Leave empty to allow all editable fields"
+        },
+        {
+            "fieldname": "allowed_filters",
+            "fieldtype": "Table",
+            "label": "Allowed Filters",
+            "options": "MCP Filter Allowlist Item",
+            "description": "Leave empty to allow strictly equality filters on indexed fields (recommended)"
+        },
+        {
+            "fieldname": "notes",
+            "fieldtype": "Small Text",
+            "label": "Notes"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2025-01-20 20:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Mcp Server",
+    "name": "MCP Doctype Allowlist",
+    "naming_rule": "Expression",
+    "autoname": "format:{doctype_ref}",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

@@ -1,0 +1,40 @@
+{
+    "actions": [],
+    "creation": "2025-01-20 20:00:00.000000",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "fieldname",
+        "operator"
+    ],
+    "fields": [
+        {
+            "fieldname": "fieldname",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Fieldname",
+            "reqd": 1
+        },
+        {
+            "fieldname": "operator",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Operator",
+            "options": "=\n!=\n>\n<\n>=\n<=\nlike\nbetween\nin\nnot in",
+            "default": "=",
+            "reqd": 1
+        }
+    ],
+    "istable": 1,
+    "links": [],
+    "modified": "2025-01-20 20:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Mcp Server",
+    "name": "MCP Filter Allowlist Item",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}
