@@ -1,5 +1,7 @@
 # MCP Server for Frappe
 
+[![Leggi in Italiano](https://img.shields.io/badge/lang-it-green.svg)](README.it.md)
+
 A secure, audit-logged **Model Context Protocol (MCP)** server for Frappe. 
 This app allows you to expose specific DocTypes and operations to MCP clients (like AI agents) with strict granular permissions, ensuring secure and controlled access to your Frappe data.
 
