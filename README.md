@@ -100,59 +100,10 @@ Check **MCP Audit Log** in Desk to see a history of all requests, including succ
 ## License
 MIT
 
-## Quick Connect: MCP Client (Bridge)
+## Quick Connect: MCP Client
 
-To using this server with an AI Client (like Claude Desktop or Cursor), you need to run a local "bridge" script that forwards MCP requests to your Frappe site.
+To connect to this server from an AI Client (like Claude Desktop or Cursor), use the official Python Client:
 
-1.  **Install dependencies**:
-    ```bash
-    pip install "mcp[cli]" httpx
-    ```
+[**frappe-mcp-client**](https://github.com/mascor/frappe-mcp-client)
 
-2.  **Create `frappe_mcp_bridge.py`**:
-    ```python
-    from mcp.server.fastmcp import FastMCP
-    import httpx
-
-    # Configuration
-    FRAPPE_URL = "https://<your-site>"
-    MCP_TOKEN = "<your-token>"
-
-    mcp = FastMCP("Frappe Bridge")
-
-    @mcp.tool()
-    def search_docs(doctype: str, filters: dict = None, fields: list = None):
-        """Search for documents in Frappe"""
-        url = f"{FRAPPE_URL}/api/method/mcp_server.api.search_docs"
-        resp = httpx.post(url, headers={"X-MCP-Token": MCP_TOKEN}, 
-                         json={"doctype": doctype, "filters": filters, "fields": fields})
-        resp.raise_for_status()
-        return resp.json()["message"]
-
-    @mcp.tool()
-    def create_doc(doctype: str, data: dict):
-        """Create a document in Frappe"""
-        url = f"{FRAPPE_URL}/api/method/mcp_server.api.create_doc"
-        resp = httpx.post(url, headers={"X-MCP-Token": MCP_TOKEN}, 
-                         json={"doctype": doctype, "data": data})
-        resp.raise_for_status()
-        return resp.json()["message"]
-
-    # Add other tools (get_doc, update_doc, etc.) similarly...
-
-    if __name__ == "__main__":
-        mcp.run()
-    ```
-
-3.  **Run it via your MCP Client Config**:
-    Add this to your `claude_desktop_config.json`:
-    ```json
-    {
-      "mcpServers": {
-        "frappe": {
-          "command": "python",
-          "args": ["/path/to/frappe_mcp_bridge.py"]
-        }
-      }
-    }
-    ```
+Follow the installation and setup instructions in the client repository to get started.
