@@ -32,7 +32,7 @@ You can use the included setup script to quickly configure the server with a def
 bench --site <your-site> execute mcp_server.mcp_server.setup.setup_mcp
 ```
 This will:
-- Create a user `mcp@local` (if not exists).
+- Create a user `mcp@example.com` (if not exists).
 - Generate a secure `X-MCP-Token` and save it in **MCP Server Settings**.
 - Enable the MCP Server.
 

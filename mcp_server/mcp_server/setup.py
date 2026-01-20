@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 
-def setup_mcp(user_email="mcp@local", create_user=True):
+def setup_mcp(user_email="mcp@example.com", create_user=True):
     """
     Onboarding script to setup MCP Server.
     1. Creates MCP User if not exists.
@@ -15,7 +15,7 @@ def setup_mcp(user_email="mcp@local", create_user=True):
             user.first_name = "MCP"
             user.last_name = "User"
             user.send_welcome_email = 0
-            user.params["ignore_password_policy"] = 1 # Hacky but sometimes needed
+            user.flags.ignore_password_policy = True
             user.insert(ignore_permissions=True)
             print(f"Created user {user_email}")
         else:
