@@ -337,6 +337,9 @@ def update_doc(doctype, name, data):
 def delete_doc(doctype, name):
     check_doctype_allowlist(doctype, 'delete')
     
+    if not frappe.db.exists(doctype, name):
+        frappe.throw(f"Document {doctype} {name} not found", frappe.DoesNotExistError)
+
     frappe.delete_doc(doctype, name, ignore_permissions=True)
     
     return {"status": "deleted", "name": name}
