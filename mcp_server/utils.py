@@ -108,20 +108,14 @@ def validate_filters(doctype, filters, allowlist_doc=None):
          allowlist_doc = check_doctype_allowlist(doctype, 'read')
          
     # Parse allowed filters into a quick lookup: {fieldname: [allowed_ops]}
-    # If allowed_filters table is empty -> Assume strict deny? Or allow equality on all fields?
-    # Spec: "Validare filtri: solo campi e operatori consentiti... limitando filtri a allowlist"
-    # "Vuoto = default deny oppure default allow (decidere per sicurezza: consigliato default deny)"
-    # Let's go with STRICT: If table is empty, NO FILTERS ALLOWED (except maybe name?).
-    # Wait, that's too harsh. "Search consente solo filtri e operatori allowlisted".
-    # If I want to allow generic search, I must populate the table.
-    # Okay, let's assume if the table is empty, we allow filtering on 'name' only? Or nothing?
-    # Let's say: if table is empty => NO FILTERS allow.
-    
-    allowed_map = {} # fieldname -> set(operators)
-    for row in allowlist_doc.allowed_filters:
-        if row.fieldname not in allowed_map:
-            allowed_map[row.fieldname] = set()
-        allowed_map[row.fieldname].add(row.operator)
+    has_restrictions = len(allowlist_doc.allowed_filters) > 0
+    allowed_map = {} 
+
+    if has_restrictions:
+        for row in allowlist_doc.allowed_filters:
+            if row.fieldname not in allowed_map:
+                allowed_map[row.fieldname] = set()
+            allowed_map[row.fieldname].add(row.operator)
 
     # Normalize filters to list of [field, op, value]
     filter_list = []
@@ -145,11 +139,12 @@ def validate_filters(doctype, filters, allowlist_doc=None):
         if field == "name":
             continue
             
-        if field not in allowed_map:
-            frappe.throw(f"Filtering by field '{field}' is not allowed", frappe.PermissionError)
-            
-        if op not in allowed_map[field]:
-             frappe.throw(f"Operator '{op}' is not allowed for field '{field}'", frappe.PermissionError) 
+        if has_restrictions:
+            if field not in allowed_map:
+                frappe.throw(f"Filtering by field '{field}' is not allowed", frappe.PermissionError)
+                
+            if op not in allowed_map[field]:
+                 frappe.throw(f"Operator '{op}' is not allowed for field '{field}'", frappe.PermissionError) 
 
 def log_mcp_audit(execution_data):
     """
