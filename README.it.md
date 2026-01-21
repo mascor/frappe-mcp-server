@@ -1,5 +1,12 @@
 # Server MCP per Frappe
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Frappe](https://img.shields.io/badge/Frappe-Framework-blue)](https://frappeframework.com)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-green)](https://modelcontextprotocol.io)
+[![Security Audit](https://img.shields.io/badge/Security%20Audit-Passed-brightgreen)](#report-di-audit-di-sicurezza)
+[![Tests](https://img.shields.io/badge/Tests-18%2F18%20Passed-brightgreen)](#riepilogo-risultati-test)
+
 [![Read in English](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 
 Un server **Model Context Protocol (MCP)** sicuro e con audit log per Frappe.
