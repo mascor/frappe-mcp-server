@@ -4,11 +4,12 @@ from functools import wraps
 import json
 import time
 from mcp_server.utils import (
-    get_mcp_settings, 
-    check_doctype_allowlist, 
-    validate_fields, 
-    validate_filters, 
-    log_mcp_audit
+    get_mcp_settings,
+    check_doctype_allowlist,
+    validate_fields,
+    validate_filters,
+    log_mcp_audit,
+    SENSITIVE_FIELDS
 )
 
 def handle_mcp_auth():
@@ -171,15 +172,15 @@ def get_meta(doctype):
     # Construct filtered meta
     filtered_fields = []
     for df in meta.fields:
-        if df.fieldname in allowed_fields:
-            filtered_fields.append({
-                "fieldname": df.fieldname,
-                "label": df.label,
-                "fieldtype": df.fieldtype,
-                "options": df.options,
-                "reqd": df.reqd,
-                "default": df.default
-            })
+        if df.fieldname in allowed_fields and df.fieldname not in SENSITIVE_FIELDS:
+                filtered_fields.append({
+                    "fieldname": df.fieldname,
+                    "label": df.label,
+                    "fieldtype": df.fieldtype,
+                    "options": df.options,
+                    "reqd": df.reqd,
+                    "default": df.default
+                })
             
     return {
         "doctype": doctype,
@@ -221,6 +222,9 @@ def get_doc(doctype, name, fields=None):
         requested_fields = validate_fields(doctype, ["*"], 'read', allowlist_doc=allowlist_doc)
         
     for f in requested_fields:
+        if f in SENSITIVE_FIELDS:
+            continue
+            
         if hasattr(doc, f):
             result[f] = getattr(doc, f)
             

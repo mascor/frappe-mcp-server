@@ -2,6 +2,8 @@ import frappe
 import json
 import time
 
+SENSITIVE_FIELDS = ["api_key", "api_secret", "password", "new_password", "reset_password_key", "last_reset_password_key_generated_on"]
+
 def get_mcp_settings():
     return frappe.get_single("MCP Server Settings")
 
