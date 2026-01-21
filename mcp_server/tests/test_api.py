@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from mcp_server.mcp_server.api import mcp_ping, search_docs, get_doc, create_doc, update_doc
-from mcp_server.mcp_server.utils import get_mcp_settings
+from mcp_server.api import mcp_ping, search_docs, get_doc, create_doc, update_doc
+from mcp_server.utils import get_mcp_settings
 
 class TestMCPAPI(FrappeTestCase):
     def setUp(self):

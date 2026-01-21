@@ -31,7 +31,7 @@ Questa app ti permette di esporre specifici DocType e operazioni ai client MCP (
 Puoi usare lo script di setup incluso per configurare rapidamente il server con un utente e un token predefiniti:
 
 ```bash
-bench --site <tuo-sito> execute mcp_server.mcp_server.setup.setup_mcp
+bench --site <tuo-sito> execute mcp_server.setup.setup_mcp
 ```
 Questo farà quanto segue:
 - Crea un utente `mcp@example.com` (se non esiste).

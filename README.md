@@ -31,7 +31,7 @@ This app allows you to expose specific DocTypes and operations to MCP clients (l
 You can use the included setup script to quickly configure the server with a default user and token:
 
 ```bash
-bench --site <your-site> execute mcp_server.mcp_server.setup.setup_mcp
+bench --site <your-site> execute mcp_server.setup.setup_mcp
 ```
 This will:
 - Create a user `mcp@example.com` (if not exists).
@@ -53,15 +53,17 @@ By default, **no access is allowed**. You must explicitly allow DocTypes.
 The server exposes standard MCP tools via the API.
 
 ### Authentication
-Include the `X-MCP-Token` header in all requests.
+The server supports **API Key** authentication (recommended for MCP clients).
+
+Include the `Authorization` header in all requests.
 
 ### Tools
 
 #### `mcp_ping`
 Health check and version info.
 ```bash
-curl -X POST https://<yoursite>/api/method/mcp_server.api.mcp_ping \
-     -H "X-MCP-Token: <your-token>"
+curl -X POST https://<yoursite>/api/method/mcp_server.api.ping \
+     -H "Authorization: token <api_key>:<api_secret>"
 ```
 
 #### `search_docs`
