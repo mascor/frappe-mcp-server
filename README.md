@@ -111,3 +111,246 @@ To connect to this server from an AI Client (like Claude Desktop or Cursor), use
 [**frappe-mcp-client**](https://github.com/mascor/frappe-mcp-client)
 
 Follow the installation and setup instructions in the client repository to get started.
+
+# Frappe MCP Server - Test Results
+
+## Available Commands
+
+| Command | Description | Parameters |
+|---------|-------------|------------|
+| `ping` | Check server connection | None |
+| `search_docs` | Search documents | `doctype` (required), `filters` (optional), `fields` (optional) |
+| `get_doc` | Get a specific document | `doctype` (required), `name` (required) |
+| `create_doc` | Create a new document | `doctype` (required), `data` (required) |
+| `update_doc` | Update an existing document | `doctype` (required), `name` (required), `data` (required) |
+| `get_meta` | Get DocType metadata | `doctype` (required) |
+| `delete_doc` | Delete a document | `doctype` (required), `name` (required) |
+
+---
+
+## Test Results Summary
+
+| Command | Status | Notes |
+|---------|--------|-------|
+| `ping` | ✅ Pass | Server responds correctly |
+| `get_meta` | ✅ Pass | Returns DocType structure |
+| `create_doc` | ✅ Pass | Document created successfully |
+| `search_docs` | ✅ Pass | Returns list of documents |
+| `get_doc` | ✅ Pass | Returns document details |
+| `update_doc` | ✅ Pass | Document updated successfully |
+| `delete_doc` | ✅ Pass | Document deleted successfully |
+
+---
+
+## Test Examples
+
+### 1. ping
+Check server connection status.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "site": "your-site.example.com",
+  "user": "mcp_user@example.com"
+}
+```
+
+---
+
+### 2. get_meta
+Get the structure of a DocType.
+
+**Request:**
+```
+doctype: "ToDo"
+```
+
+**Response:**
+```json
+{
+  "doctype": "ToDo",
+  "fields": [
+    {
+      "fieldname": "status",
+      "label": "Status",
+      "fieldtype": "Select",
+      "options": "Open\nClosed\nCancelled",
+      "reqd": 0,
+      "default": "Open"
+    },
+    {
+      "fieldname": "priority",
+      "label": "Priority",
+      "fieldtype": "Select",
+      "options": "High\nMedium\nLow",
+      "reqd": 0,
+      "default": "Medium"
+    },
+    {
+      "fieldname": "date",
+      "label": "Due Date",
+      "fieldtype": "Date",
+      "reqd": 0,
+      "default": "Today"
+    },
+    {
+      "fieldname": "description",
+      "label": "Description",
+      "fieldtype": "Text Editor",
+      "reqd": 1
+    }
+  ],
+  "issingle": 0,
+  "istable": 0
+}
+```
+
+---
+
+### 3. create_doc
+Create a new document.
+
+**Request:**
+```
+doctype: "ToDo"
+data: {
+  "status": "Open",
+  "priority": "High",
+  "description": "Test task created via MCP"
+}
+```
+
+**Response:**
+```json
+{
+  "name": "abc123xyz",
+  "owner": "mcp_user@example.com",
+  "creation": "2026-01-21 10:18:41.295624",
+  "modified": "2026-01-21 10:18:41.295624",
+  "modified_by": "mcp_user@example.com",
+  "docstatus": 0,
+  "status": "Open",
+  "priority": "High",
+  "date": "2026-01-21",
+  "description": "Test task created via MCP",
+  "doctype": "ToDo"
+}
+```
+
+---
+
+### 4. search_docs
+Search for documents.
+
+**Request:**
+```
+doctype: "ToDo"
+```
+
+**Response:**
+```json
+[
+  {"name": "todo001"},
+  {"name": "todo002"},
+  {"name": "todo003"}
+]
+```
+
+---
+
+### 5. get_doc
+Get a specific document by name.
+
+**Request:**
+```
+doctype: "ToDo"
+name: "abc123xyz"
+```
+
+**Response:**
+```json
+{
+  "name": "abc123xyz",
+  "owner": "mcp_user@example.com",
+  "status": "Open",
+  "priority": "High",
+  "date": "2026-01-21",
+  "description": "Test task created via MCP",
+  "creation": "2026-01-21 10:18:41.295624",
+  "modified": "2026-01-21 10:18:41.295624",
+  "modified_by": "mcp_user@example.com",
+  "docstatus": 0
+}
+```
+
+---
+
+### 6. update_doc
+Update an existing document.
+
+**Request:**
+```
+doctype: "ToDo"
+name: "abc123xyz"
+data: {
+  "status": "Closed",
+  "priority": "Low"
+}
+```
+
+**Response:**
+```json
+{
+  "name": "abc123xyz",
+  "owner": "mcp_user@example.com",
+  "creation": "2026-01-21 10:18:41.295624",
+  "modified": "2026-01-21 10:18:59.096886",
+  "modified_by": "mcp_user@example.com",
+  "docstatus": 0,
+  "status": "Closed",
+  "priority": "Low",
+  "date": "2026-01-21",
+  "description": "Test task created via MCP",
+  "doctype": "ToDo"
+}
+```
+
+---
+
+### 7. delete_doc
+Delete a document.
+
+**Request:**
+```
+doctype: "ToDo"
+name: "abc123xyz"
+```
+
+**Response:**
+```json
+{
+  "status": "deleted",
+  "name": "abc123xyz"
+}
+```
+
+---
+
+## Setup Requirements
+
+1. **Install the MCP Server app** on your Frappe site
+2. **Create an API user** (e.g., `mcp_user@example.com`)
+3. **Generate API keys** for the user (User → API Access → Generate Keys)
+4. **Assign appropriate roles** to the API user (e.g., System Manager)
+5. **Configure the MCP client** with the API credentials
+
+---
+
+## Troubleshooting
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `403 Forbidden` | Missing permissions | Assign roles to API user or add `@frappe.whitelist()` decorator |
+| `417 Expectation Failed` | Module not found | Install/reinstall the MCP Server app |
+| `500 Internal Server Error` | Code error | Check server logs with `bench --site [site] logs` |
