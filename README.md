@@ -112,7 +112,7 @@ To connect to this server from an AI Client (like Claude Desktop or Cursor), use
 
 Follow the installation and setup instructions in the client repository to get started.
 
-# Frappe MCP Server - Test Results
+# Frappe MCP Server - Test Report
 
 ## Available Commands
 
@@ -130,15 +130,47 @@ Follow the installation and setup instructions in the client repository to get s
 
 ## Test Results Summary
 
-| Command | Status | Notes |
-|---------|--------|-------|
-| `ping` | ✅ Pass | Server responds correctly |
-| `get_meta` | ✅ Pass | Returns DocType structure |
-| `create_doc` | ✅ Pass | Document created successfully |
-| `search_docs` | ✅ Pass | Returns list of documents |
-| `get_doc` | ✅ Pass | Returns document details |
-| `update_doc` | ✅ Pass | Document updated successfully |
-| `delete_doc` | ✅ Pass | Document deleted successfully |
+### Section A: Standard DocType Operations
+
+| Test | DocType | Operation | Status |
+|------|---------|-----------|--------|
+| A1 | Note | create_doc | ✅ PASS |
+| A2 | Note | get_doc | ✅ PASS |
+| A3 | Note | update_doc | ✅ PASS |
+| A4 | Note | search_docs | ✅ PASS |
+| A5 | Note | delete_doc | ✅ PASS |
+| A6 | Event | create_doc | ✅ PASS |
+| A7 | Event | get_meta | ✅ PASS |
+| A8 | Event | delete_doc | ✅ PASS |
+
+### Section B: Filters and Fields
+
+| Test | Description | Status |
+|------|-------------|--------|
+| B1 | search_docs with filters | ✅ PASS |
+| B2 | search_docs with fields | ✅ PASS |
+| B3 | search_docs with filters + fields | ✅ PASS |
+
+### Section C: Edge Cases / Error Handling
+
+| Test | Description | Expected | Status |
+|------|-------------|----------|--------|
+| C1 | get_doc non-existent document | 404 Not Found | ✅ PASS |
+| C2 | create_doc missing required field | 417 Expectation Failed | ✅ PASS |
+| C3 | update_doc non-existent document | 404 Not Found | ✅ PASS |
+| C4 | delete_doc non-existent document | 404 Not Found | ✅ PASS |
+| C5 | get_meta non-existent DocType | 403 Forbidden | ✅ PASS |
+
+### Section D: Permissions
+
+| Test | Description | Status |
+|------|-------------|--------|
+| D1 | search_docs on allowed DocType (User) | ✅ PASS |
+| D2 | get_meta on non-allowed DocType (Role) | ✅ PASS (403) |
+
+---
+
+## 🎉 Final Result: 18/18 Tests Passed
 
 ---
 
@@ -175,7 +207,7 @@ doctype: "ToDo"
       "fieldname": "status",
       "label": "Status",
       "fieldtype": "Select",
-      "options": "Open\nClosed\nCancelled",
+      "options": "Open\\nClosed\\nCancelled",
       "reqd": 0,
       "default": "Open"
     },
@@ -183,7 +215,7 @@ doctype: "ToDo"
       "fieldname": "priority",
       "label": "Priority",
       "fieldtype": "Select",
-      "options": "High\nMedium\nLow",
+      "options": "High\\nMedium\\nLow",
       "reqd": 0,
       "default": "Medium"
     },
@@ -241,9 +273,9 @@ data: {
 ---
 
 ### 4. search_docs
-Search for documents.
+Search for documents with optional filters and fields.
 
-**Request:**
+**Request (basic):**
 ```
 doctype: "ToDo"
 ```
@@ -254,6 +286,31 @@ doctype: "ToDo"
   {"name": "todo001"},
   {"name": "todo002"},
   {"name": "todo003"}
+]
+```
+
+**Request (with filters and fields):**
+```
+doctype: "ToDo"
+filters: {"status": "Open"}
+fields: ["name", "status", "priority", "description"]
+```
+
+**Response:**
+```json
+[
+  {
+    "name": "todo001",
+    "status": "Open",
+    "priority": "Medium",
+    "description": "Test task 1"
+  },
+  {
+    "name": "todo002",
+    "status": "Open",
+    "priority": "High",
+    "description": "Test task 2"
+  }
 ]
 ```
 
@@ -335,22 +392,82 @@ name: "abc123xyz"
 }
 ```
 
+**Error Response (document not found):**
+```
+HTTP 404 Not Found
+```
+
 ---
 
 ## Setup Requirements
 
 1. **Install the MCP Server app** on your Frappe site
+   ```bash
+   bench get-app https://github.com/[repo]/frappe-mcp-server
+   bench --site [your-site] install-app mcp_server
+   ```
+
 2. **Create an API user** (e.g., `mcp_user@example.com`)
-3. **Generate API keys** for the user (User → API Access → Generate Keys)
+
+3. **Generate API keys** for the user
+   - Go to User → API Access → Generate Keys
+
 4. **Assign appropriate roles** to the API user (e.g., System Manager)
-5. **Configure the MCP client** with the API credentials
+
+5. **Configure the Allowlist**
+   - Go to "MCP Doctype Allowlist"
+   - Add DocTypes you want to expose via MCP
+   - Configure allowed operations (Read, Create, Update, Delete, Meta)
+
+6. **Configure the MCP client** with the API credentials
+
+---
+
+## Allowlist Configuration
+
+The MCP Server uses an Allowlist to control which DocTypes are accessible. For each DocType you can configure:
+
+| Option | Description |
+|--------|-------------|
+| **Allow Read (Get, Search)** | Permits `get_doc` and `search_docs` |
+| **Allow Create** | Permits `create_doc` |
+| **Allow Update** | Permits `update_doc` |
+| **Allow Delete** | Permits `delete_doc` |
+| **Allow Meta (Schema)** | Permits `get_meta` |
+| **Max Page Length** | Limits results for `search_docs` (0 = default) |
+| **Allowed Fields (Read)** | Restrict which fields are returned (empty = all) |
+| **Allowed Filters** | Restrict which fields can be used in filters (empty = all) |
+
+---
+
+## Error Codes
+
+| HTTP Code | Meaning | Common Causes |
+|-----------|---------|---------------|
+| `200` | Success | Operation completed |
+| `403` | Forbidden | DocType not in Allowlist or operation not permitted |
+| `404` | Not Found | Document or DocType does not exist |
+| `417` | Expectation Failed | Validation error (e.g., missing required field) |
+| `500` | Internal Server Error | Server-side error (check logs) |
 
 ---
 
 ## Troubleshooting
 
-| Error | Cause | Solution |
+| Issue | Cause | Solution |
 |-------|-------|----------|
-| `403 Forbidden` | Missing permissions | Assign roles to API user or add `@frappe.whitelist()` decorator |
-| `417 Expectation Failed` | Module not found | Install/reinstall the MCP Server app |
-| `500 Internal Server Error` | Code error | Check server logs with `bench --site [site] logs` |
+| `403 Forbidden` on all calls | Missing Allowlist entry | Add DocType to MCP Doctype Allowlist |
+| `403 Forbidden` on specific operation | Operation not enabled | Enable the operation in Allowlist |
+| `403 Forbidden` with filters | Filter field not allowed | Add field to Allowed Filters or leave empty for all |
+| `404 Not Found` | Document doesn't exist | Verify document name |
+| `417 Expectation Failed` | Validation error | Check required fields in DocType |
+| `500 Internal Server Error` | Code error | Run `bench --site [site] logs` |
+
+---
+
+## Security Notes
+
+- Only DocTypes explicitly added to the Allowlist are accessible
+- Each operation (Read, Create, Update, Delete, Meta) must be explicitly enabled
+- API authentication is required for all operations
+- Consider restricting sensitive DocTypes (User, Role, etc.) in production
