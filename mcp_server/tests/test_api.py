@@ -1,6 +1,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from mcp_server.api import mcp_ping, search_docs, get_doc, create_doc, update_doc
+from mcp_server.api import mcp_ping, search_docs, get_doc, create_doc, update_doc, delete_doc
 from mcp_server.utils import get_mcp_settings
 
 class TestMCPAPI(FrappeTestCase):
@@ -28,7 +28,13 @@ class TestMCPAPI(FrappeTestCase):
             "allow_create": 1,
             "allow_update": 1,
             "allow_delete": 1,
-            "allow_meta": 1
+            "allow_meta": 1,
+            # "description" isn't an indexed field, so with the tightened
+            # default (see test_search_docs_unindexed_field_requires_allowlist
+            # below) it needs an explicit rule to stay filterable.
+            "allowed_filters": [
+                {"fieldname": "description", "operator": "="},
+            ],
         }).insert()
         
         # Mock Request Header
@@ -68,7 +74,46 @@ class TestMCPAPI(FrappeTestCase):
     def test_not_allowed_doctype(self):
         with self.assertRaises(frappe.PermissionError):
             search_docs("User")
+
+    def test_search_docs_default_allows_equality_on_indexed_field(self):
+        # No "Allowed Filters" rows at all: only "=" on an indexed field
+        # (unique/search_index/Link/Select) should be allowed by default.
+        # "status" is a Select on ToDo, so it qualifies.
+        self.allowlist.allowed_filters = []
+        self.allowlist.save()
+
+        frappe.get_doc({"doctype": "ToDo", "description": "MCP Test 2", "status": "Open"}).insert()
+        res = search_docs("ToDo", filters={"status": "Open"})
+        self.assertTrue(len(res) >= 1)
+
+    def test_search_docs_default_rejects_unindexed_field(self):
+        # "description" is a Text Editor field (not indexed): with no
+        # explicit "Allowed Filters" rows it must be rejected, not
+        # silently allowed as it was before this fix.
+        self.allowlist.allowed_filters = []
+        self.allowlist.save()
+
+        with self.assertRaises(frappe.PermissionError):
+            search_docs("ToDo", filters={"description": "MCP Test"})
+
+    def test_search_docs_default_rejects_non_equality_operator(self):
+        self.allowlist.allowed_filters = []
+        self.allowlist.save()
+
+        with self.assertRaises(frappe.PermissionError):
+            search_docs("ToDo", filters=[["status", "like", "Open%"]])
             
+    def test_delete_doc_respects_permissions(self):
+        # Smoke test only: Administrator bypasses permission checks anyway,
+        # so this doesn't prove the ignore_permissions=True removal fixed
+        # anything — it only proves the removal didn't break the happy
+        # path. A real regression test needs a non-privileged mcp_user
+        # fixture without delete rights on ToDo, which this PR doesn't add.
+        todo = frappe.get_doc({"doctype": "ToDo", "description": "To be deleted"}).insert()
+        res = delete_doc("ToDo", todo.name)
+        self.assertEqual(res["status"], "deleted")
+        self.assertFalse(frappe.db.exists("ToDo", todo.name))
+
     def test_audit_logging(self):
         mcp_ping()
         logs = frappe.get_all("MCP Audit Log", fields=["name", "operation", "status"])

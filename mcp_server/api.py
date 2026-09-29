@@ -104,14 +104,6 @@ def mcp_tool(func):
                  execution_data["latency_ms"] = int((time.time() - start_time) * 1000)
                  log_mcp_audit(execution_data)
     
-    # Register wrapper in frappe's whitelist registry (same as @frappe.whitelist() does)
-    if func in frappe.whitelisted:
-        frappe.whitelisted.append(wrapper)
-    if func in frappe.guest_methods:
-        frappe.guest_methods.append(wrapper)
-    if func in frappe.allowed_http_methods_for_whitelisted_func:
-        frappe.allowed_http_methods_for_whitelisted_func[wrapper] = frappe.allowed_http_methods_for_whitelisted_func[func]
-                 
     return wrapper
 
 @frappe.whitelist(allow_guest=True)
@@ -340,10 +332,15 @@ def update_doc(doctype, name, data):
 @mcp_tool
 def delete_doc(doctype, name):
     check_doctype_allowlist(doctype, 'delete')
-    
+
     if not frappe.db.exists(doctype, name):
         frappe.throw(f"Document {doctype} {name} not found", frappe.DoesNotExistError)
 
-    frappe.delete_doc(doctype, name, ignore_permissions=True)
-    
+    # No ignore_permissions: unlike the allowlist (a config checkbox),
+    # this makes the impersonated MCP user's real Frappe permissions a
+    # second, independent gate on delete — consistent with get_doc/
+    # create_doc/update_doc below, none of which bypass permissions
+    # either.
+    frappe.delete_doc(doctype, name)
+
     return {"status": "deleted", "name": name}
