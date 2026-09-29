@@ -102,22 +102,31 @@ def validate_filters(doctype, filters, allowlist_doc=None):
     """
     Validates filters against the allowlist.
     filters: dict {field: value} or list of lists [[field, op, value], ...]
+
+    If `allowed_filters` is empty, the DocType JSON promises "strictly
+    equality filters on indexed fields" — that safe default was declared
+    but never implemented (any field/operator went through unchecked).
+    This restores it: with no explicit rows, only "=" is allowed, and only
+    on fields Frappe considers indexed (unique, search_index, or a Link/
+    Select field, which Frappe always indexes).
     """
     if not filters:
         return
-        
+
     if not allowlist_doc:
          allowlist_doc = check_doctype_allowlist(doctype, 'read')
-         
+
     # Parse allowed filters into a quick lookup: {fieldname: [allowed_ops]}
     has_restrictions = len(allowlist_doc.allowed_filters) > 0
-    allowed_map = {} 
+    allowed_map = {}
 
     if has_restrictions:
         for row in allowlist_doc.allowed_filters:
             if row.fieldname not in allowed_map:
                 allowed_map[row.fieldname] = set()
             allowed_map[row.fieldname].add(row.operator)
+    else:
+        indexed_fields = _get_indexed_fieldnames(doctype)
 
     # Normalize filters to list of [field, op, value]
     filter_list = []
@@ -131,22 +140,48 @@ def validate_filters(doctype, filters, allowlist_doc=None):
                      filter_list.append([f[0], f[1], f[2]])
                 elif len(f) == 2: # field, value -> op "="
                      filter_list.append([f[0], "=", f[1]])
-    
+
     # Validation loop
     for f_item in filter_list:
         field = f_item[0]
         op = f_item[1]
-        
+
         # Always allow filtering by name? Usually yes.
         if field == "name":
             continue
-            
+
         if has_restrictions:
             if field not in allowed_map:
                 frappe.throw(f"Filtering by field '{field}' is not allowed", frappe.PermissionError)
-                
+
             if op not in allowed_map[field]:
-                 frappe.throw(f"Operator '{op}' is not allowed for field '{field}'", frappe.PermissionError) 
+                 frappe.throw(f"Operator '{op}' is not allowed for field '{field}'", frappe.PermissionError)
+        else:
+            if op != "=":
+                frappe.throw(
+                    f"Operator '{op}' is not allowed on '{doctype}' without an explicit Allowed Filters entry "
+                    "(default is equality on indexed fields only)",
+                    frappe.PermissionError,
+                )
+            if field not in indexed_fields:
+                frappe.throw(
+                    f"Filtering by field '{field}' is not allowed on '{doctype}' without an explicit Allowed "
+                    "Filters entry (default is equality on indexed fields only)",
+                    frappe.PermissionError,
+                )
+
+
+def _get_indexed_fieldnames(doctype):
+    """Fieldnames Frappe treats as indexed: explicit unique/search_index
+    flags, plus Link and Select fields, which Frappe always indexes."""
+    meta = frappe.get_meta(doctype)
+    indexed = {
+        df.fieldname
+        for df in meta.fields
+        if df.unique or df.search_index or df.fieldtype in ("Link", "Select")
+    }
+    indexed.update({"owner", "creation", "modified", "docstatus"})
+    return indexed
 
 def log_mcp_audit(execution_data):
     """
